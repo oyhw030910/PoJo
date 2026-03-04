@@ -17,11 +17,12 @@ from tqdm import tqdm
 
 from agent.policy import PolicyNetwork, PolicyConfig
 from agent.llm_wrapper import LLMConfig
-from environment.code_env import CodeEnvironment, CodeTask
+from environment.code_env import CodeEnvironment
 from rl.ppo_trainer import PPOTrainer, PPOConfig
 from rl.trainer import RLTrainer, TrainingConfig
 from utils.helpers import seed_all
 from utils.logger import setup_logger, TrainingLogger
+from data.datasets import load_code_dataset
 
 
 def parse_args():
@@ -38,6 +39,13 @@ def parse_args():
                         help="Device to use")
     parser.add_argument("--resume", type=str, default=None,
                         help="Path to checkpoint to resume from")
+
+    # Dataset arguments
+    parser.add_argument("--dataset", type=str, default="demo",
+                        choices=["demo", "humaneval", "mbpp"],
+                        help="Dataset to use for training")
+    parser.add_argument("--data-dir", type=str, default=None,
+                        help="Directory containing dataset files")
 
     # Override arguments
     parser.add_argument("--model", type=str, default=None,
@@ -58,57 +66,7 @@ def load_config(config_path: str) -> Dict[str, Any]:
     return {}
 
 
-def create_sample_tasks() -> list:
-    """Create sample code tasks for training."""
-    tasks = [
-        CodeTask(
-            id="add_two_numbers",
-            description="Write a function that adds two numbers together.",
-            starter_code="def add(a, b):\n    ",
-            signature="def add(a, b)",
-            test_cases=[
-                {"args": [1, 2], "expected": 3},
-                {"args": [5, 7], "expected": 12},
-                {"args": [-1, 1], "expected": 0},
-                {"args": [0, 0], "expected": 0},
-            ]
-        ),
-        CodeTask(
-            id="is_even",
-            description="Write a function that checks if a number is even.",
-            starter_code="def is_even(n):\n    ",
-            signature="def is_even(n)",
-            test_cases=[
-                {"args": [2], "expected": True},
-                {"args": [3], "expected": False},
-                {"args": [0], "expected": True},
-                {"args": [-4], "expected": True},
-            ]
-        ),
-        CodeTask(
-            id="reverse_string",
-            description="Write a function that reverses a string.",
-            starter_code="def reverse(s):\n    ",
-            signature="def reverse(s)",
-            test_cases=[
-                {"args": ["hello"], "expected": "olleh"},
-                {"args": ["a"], "expected": "a"},
-                {"args": [""], "expected": ""},
-            ]
-        ),
-        CodeTask(
-            id="count_vowels",
-            description="Write a function that counts the number of vowels in a string.",
-            starter_code="def count_vowels(s):\n    ",
-            signature="def count_vowels(s)",
-            test_cases=[
-                {"args": ["hello"], "expected": 2},
-                {"args": ["AEIOU"], "expected": 5},
-                {"args": ["xyz"], "expected": 0},
-            ]
-        ),
-    ]
-    return tasks
+# Note: Task creation is now handled by data.datasets.load_code_dataset()
 
 
 def obs_to_tensor(obs: Any, device: str) -> Dict[str, torch.Tensor]:
@@ -165,8 +123,11 @@ def main():
 
     # Create environment
     env = CodeEnvironment(config.get("environment", {}))
-    tasks = create_sample_tasks()
-    logger.info(f"Created {len(tasks)} sample tasks")
+
+    # Load dataset
+    logger.info(f"Loading dataset: {args.dataset}")
+    tasks = load_code_dataset(args.dataset, args.data_dir)
+    logger.info(f"Loaded {len(tasks)} tasks for training")
 
     # Create policy
     llm_config = LLMConfig(
