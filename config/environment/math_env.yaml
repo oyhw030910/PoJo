@@ -1,0 +1,25 @@
+# Math Environment Configuration
+
+environment:
+  name: "math"
+  max_steps: 20
+  timeout: 30
+
+  math:
+    dataset: "gsm8k"
+    allow_calculator: true
+    calculator_precision: 10
+
+  datasets:
+    - "gsm8k"
+    - "math"
+
+  gsm8k:
+    data_dir: "./data/gsm8k"
+    split: "test"
+    num_samples: 1319
+
+  math:
+    data_dir: "./data/math"
+    split: "test"
+    num_samples: 5000

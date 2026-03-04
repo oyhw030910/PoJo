@@ -1,0 +1,17 @@
+# Evaluation Configuration
+
+evaluation:
+  num_episodes: 200
+  deterministic: true
+  save_results: true
+  results_dir: "./evaluation_results"
+
+# Model for evaluation (use full model, no LoRA)
+model:
+  lora:
+    enabled: false
+
+# Environment for evaluation
+environment:
+  max_steps: 50
+  name: "code"  # Can be overridden by command line

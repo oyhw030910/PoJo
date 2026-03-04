@@ -1,0 +1,33 @@
+# Code Environment Configuration
+
+environment:
+  name: "code"
+  max_steps: 30
+  timeout: 60
+
+  code:
+    sandbox: true
+    allowed_imports:
+      - "math"
+      - "numpy"
+      - "re"
+      - "json"
+      - "collections"
+      - "itertools"
+      - "functools"
+      - "typing"
+
+    max_output_length: 1000
+    execution_timeout: 10
+
+  datasets:
+    - "humaneval"
+    - "mbpp"
+
+  humaneval:
+    data_dir: "./data/humaneval"
+    num_samples: 164
+
+  mbpp:
+    data_dir: "./data/mbpp"
+    num_samples: 500

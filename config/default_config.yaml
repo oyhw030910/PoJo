@@ -1,0 +1,133 @@
+# Default Configuration for RL-LLM Agent Framework
+
+# Model Configuration
+model:
+  name: "Qwen/Qwen2.5-1.5B-Instruct"
+  dtype: "float16"
+  device: "cuda"
+  max_seq_length: 2048
+  lora:
+    enabled: true
+    r: 64
+    alpha: 128
+    dropout: 0.1
+    target_modules: ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
+
+# Policy Configuration
+policy:
+  entropy_coeff: 0.01
+  value_coeff: 0.5
+  clip_param: 0.2
+  max_grad_norm: 0.5
+
+# PPO Configuration
+ppo:
+  # Training hyperparameters
+  lr: 1.0e-5
+  betas: [0.9, 0.999]
+  eps: 1.0e-8
+  weight_decay: 0.0
+
+  # PPO specific
+  epochs: 4
+  batch_size: 256
+  mini_batch_size: 32
+  gamma: 0.99
+  lam: 0.95  # GAE lambda
+  clip_value_loss: true
+
+  # KL penalty
+  target_kl: 0.02
+  kl_coeff: 0.2
+  kl_horizon: 10000
+
+# GRPO Configuration
+grpo:
+  lr: 1.0e-5
+  betas: [0.9, 0.999]
+  eps: 1.0e-8
+
+  # GRPO specific
+  epochs: 4
+  batch_size: 256
+  mini_batch_size: 32
+  group_size: 8  # Number of samples per group
+  gamma: 0.99
+
+# Memory Configuration
+memory:
+  short_term_size: 10  # Number of recent turns
+  long_term_enabled: true
+  long_term_top_k: 5
+  embedding_model: "sentence-transformers/all-MiniLM-L6-v2"
+  vector_store: "chroma"  # or "faiss"
+
+# Planner Configuration
+planner:
+  enabled: true
+  method: "react"  # "react", "tot", "reflection"
+  max_iterations: 10
+  tot_branching_factor: 3
+  tot_depth: 2
+
+# Environment Configuration
+environment:
+  name: "code"  # "code", "math", "gui"
+  max_steps: 50
+  timeout: 300  # seconds
+
+  code:
+    sandbox: true
+    allowed_imports: ["math", "numpy", "re", "json", "collections"]
+
+  math:
+    dataset: "gsm8k"
+    allow_calculator: true
+
+  gui:
+    screen_width: 1024
+    screen_height: 768
+
+# Reward Configuration
+reward:
+  # Task completion reward
+  success_reward: 1.0
+  failure_reward: -1.0
+
+  # Shaping rewards
+  step_penalty: -0.01  # Encourage efficiency
+  format_bonus: 0.1    # Correct output format
+  intermediate_bonus: 0.1  # Correct intermediate steps
+
+  # Normalization
+  normalize: true
+  clip_min: -1.0
+  clip_max: 1.0
+
+# Training Configuration
+training:
+  total_steps: 100000
+  eval_interval: 1000
+  save_interval: 5000
+  log_interval: 100
+
+  # Early stopping
+  early_stopping: true
+  patience: 5
+  min_delta: 0.001
+
+  # Checkpoint
+  checkpoint_dir: "./checkpoints"
+  load_checkpoint: null
+
+# Evaluation Configuration
+evaluation:
+  num_episodes: 100
+  deterministic: true
+
+# Logging Configuration
+logging:
+  level: "INFO"
+  tensorboard_dir: "./logs"
+  wandb_enabled: false
+  wandb_project: "rl-llm-agent"

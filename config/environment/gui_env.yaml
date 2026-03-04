@@ -1,0 +1,23 @@
+# GUI Environment Configuration
+
+environment:
+  name: "gui"
+  max_steps: 50
+  timeout: 120
+
+  gui:
+    screen_width: 1024
+    screen_height: 768
+    max_elements: 100
+
+  datasets:
+    - "webshop"
+    - "mind2web"
+
+  webshop:
+    data_dir: "./data/webshop"
+    split: "test"
+
+  mind2web:
+    data_dir: "./data/mind2web"
+    split: "test"
